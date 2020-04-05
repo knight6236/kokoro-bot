@@ -61,21 +61,15 @@ async def menu(app, member):
     msg += "预约下一轮boss: 预约下轮\n"
     msg += "取消预约: 取消老一/取消1\n"
     msg += "取消下一轮预约: 取消下轮\n"
-    # msg += "查询预约: 谁预约了老一/谁约1\n"
     msg += "查询进度/预约/boss当前状态: 老几了/预约情况/预约状态\n"
-    # msg += "查询预约/boss当前状态: 预约名单1/状态1/谁预约了老一\n"
     msg += "报刀: 报刀/打了/杀了/恰了（纯数字，单位是w，有空格）\n"
     msg += "设置boss实际剩余血量: 更新老一/更1 血量（纯数字，单位是w，有空格）\n"
-    # msg += "查询boss当前状态: 老一状态/状态1\n"
     msg += "boss死亡后: 老一了/老1了\n"
     msg += "上树: 上树/挂树\n"
     msg += "查询挂树情况: 树上情况/状态\n"
     msg += "切换阶段: 一阶了\n"
     msg += "修改圈数: 修改圈 数字\n"
-    # msg += "重置boss数据: 重置 数字（1-5）\n"
     msg += "查询活跃度: 我的活跃度/排名\n"
-    # await reply_group(app, member.group.id, msg)
-    # time.sleep(1)
     msg += "预订任务: 添加任务：x月x号x点x分和可可萝一起洗澡\n"
     msg += "取消任务: 删除任务：任务id（查询获得）\n"
     msg += "查询任务: 我的任务"
@@ -88,13 +82,11 @@ async def exchange_stage(app, member, index):
         return await reply_group(app, member.group.id, '已进入 ' + str(index) + ' 阶段，不需要切换')
     elif guild_data['current_stage'] == index - 1:
         guild_data['current_stage'] = index
-        # guild_data['current_boss'] = 1
         guild_data['current_boss_data'] = boss_data[index - 1]
         write_guild(member.group.id)
         await reply_group(app, member.group.id, '进入 ' + str(index) + ' 阶段')
         time.sleep(5)
         await boss_dead(app, member, 1)
-    # elif guild_data['current_stage'] < index - 1:
     else:
         return await reply_group(app, member.group.id,
                                  '当前阶段为第 ' + str(guild_data['current_stage']) + ' 阶段, 不能进入 ' + str(index) + ' 阶段')
@@ -291,61 +283,11 @@ async def boss_dead(app, member, index):
         return await reply_group(app, member.group.id, '当前boss为老 ' + str(current_boss) + ', 不能跳到老 ' + str(index))
 
 
-async def boss_dead_bak(app, member, name, index):
-    global guild_data
-    current_boss = guild_data['current_boss']
-    if current_boss == index + 1:
-        return await reply_group(app, member.group.id, '目前的boss就是老 ' + str(current_boss))
-    elif (current_boss != 5 and current_boss == index) or (current_boss == 5 and index == 0):
-        # 先重置打完boss的数据
-        current = guild_data['current_boss_data'][current_boss - 1]
-        # current['real_hp'] = current['all_hp']
-        cache_boss: dict = guild_data['cache_boss'].copy()
-        cache_boss['real_hp'] = cache_boss['all_hp']
-        # print('cache_boss')
-        current.update(cache_boss)
-        # print('killers')
-        # 在初始化下一个boss的数据
-        boss = guild_data['current_boss_data'][index]
-        # pprint(boss)
-        guild_data['cache_boss'] = boss_data[guild_data['current_stage'] - 1][current_boss].copy()
-
-        await down_tree(app, member)
-
-        time.sleep(5)
-
-        guild_data['current_boss'] = index + 1
-        if index == 0:
-            guild_data['current_loop'] += 1
-        write_guild(member.group.id)
-        killers = boss['killers']
-        members = []
-        msg = name + '了'
-        if len(killers) > 0:
-            rank_list = sort_dmg(killers)
-            for rank in rank_list:
-                # await reply_group(app, member.group.id, name + '了', [rank[0]])
-                # print_msg(rank=rank)
-                members.append(int(rank[0]))
-                msg += ', ' + rank[1] + '伤害为' + str(rank[2])
-            #     time.sleep(30)
-            # return
-            msg += ', 请注意按预约伤害排名出刀'
-        return await reply_group(app, member.group.id, msg, members)
-    else:
-        return await reply_group(app, member.group.id, '当前boss为老' + str(current_boss) + ', 不能跳到' + name)
-
-
 def sort_dmg(g):
-    # p = {}
-    # for g_k in g.keys():
-    #     p[g_k] = g[g_k]['hp']
-    # pprint(p)
     p = []
     for g_k in g.keys():
         t_name = strQ2B(g[g_k]['name']).split('(', maxsplit=1)[0]
         t = (g_k, t_name, g[g_k]['hp'])
-        # print(t)
         p.append(t)
     rank_list = sorted(p, key=lambda x: x[2], reverse=True)
     # pprint(rank_list)
