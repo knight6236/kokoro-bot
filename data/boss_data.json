@@ -1,0 +1,130 @@
+[
+    [
+        {
+            "all_hp": 600,
+            "pre_hp": 600,
+            "real_hp": 600,
+            "killers": {}
+        },
+        {
+            "all_hp": 800,
+            "pre_hp": 800,
+            "real_hp": 800,
+            "killers": {}
+        },
+        {
+            "all_hp": 1000,
+            "pre_hp": 1000,
+            "real_hp": 1000,
+            "killers": {}
+        },
+        {
+            "all_hp": 1200,
+            "pre_hp": 1200,
+            "real_hp": 1200,
+            "killers": {}
+        },
+        {
+            "all_hp": 1500,
+            "pre_hp": 1500,
+            "real_hp": 1500,
+            "killers": {}
+        }
+    ],
+    [
+        {
+            "all_hp": 600,
+            "pre_hp": 600,
+            "real_hp": 600,
+            "killers": {}
+        },
+        {
+            "all_hp": 800,
+            "pre_hp": 800,
+            "real_hp": 800,
+            "killers": {}
+        },
+        {
+            "all_hp": 1000,
+            "pre_hp": 1000,
+            "real_hp": 1000,
+            "killers": {}
+        },
+        {
+            "all_hp": 1200,
+            "pre_hp": 1200,
+            "real_hp": 1200,
+            "killers": {}
+        },
+        {
+            "all_hp": 1500,
+            "pre_hp": 1500,
+            "real_hp": 1500,
+            "killers": {}
+        }
+    ],
+    [
+        {
+            "all_hp": 700,
+            "pre_hp": 700,
+            "real_hp": 700,
+            "killers": {}
+        },
+        {
+            "all_hp": 900,
+            "pre_hp": 900,
+            "real_hp": 900,
+            "killers": {}
+        },
+        {
+            "all_hp": 1300,
+            "pre_hp": 1300,
+            "real_hp": 1300,
+            "killers": {}
+        },
+        {
+            "all_hp": 1500,
+            "pre_hp": 1500,
+            "real_hp": 1500,
+            "killers": {}
+        },
+        {
+            "all_hp": 2000,
+            "pre_hp": 2000,
+            "real_hp": 2000,
+            "killers": {}
+        }
+    ],
+    [
+        {
+            "all_hp": 1500,
+            "pre_hp": 1500,
+            "real_hp": 1500,
+            "killers": {}
+        },
+        {
+            "all_hp": 1600,
+            "pre_hp": 1600,
+            "real_hp": 1600,
+            "killers": {}
+        },
+        {
+            "all_hp": 1800,
+            "pre_hp": 1800,
+            "real_hp": 1800,
+            "killers": {}
+        },
+        {
+            "all_hp": 1900,
+            "pre_hp": 1900,
+            "real_hp": 1900,
+            "killers": {}
+        },
+        {
+            "all_hp": 2000,
+            "pre_hp": 2000,
+            "real_hp": 2000,
+            "killers": {}
+        }
+    ]
+]

@@ -1,0 +1,20 @@
+# 通信地址
+#host: mirai://localhost:8080/
+host: mirai://47.97.196.67:8080/
+
+# 字段 qq 的值
+#qq: 2232509854
+# qq: 2847180838
+qq: 482294818
+# qq: 3322137677
+
+# 字段 authKey 的值
+authKey: 12345678
+
+# 开启ws
+enableWebsocket: True
+
+# 推送群
+groups:
+  - 1027426994
+  - 1047913356
