@@ -57,13 +57,13 @@ def initData(member):
 
 
 async def menu(app, member):
-    msg = '预约boss: 预约老一/预约1 伤害（纯数字，单位是w，有空格）\n'
+    msg = '预约boss: 预约老一/预约1 数字（单位w，有空格；尾刀/补偿刀在数字后面加*）\n'
     msg += "预约下一轮boss: 预约下轮\n"
     msg += "取消预约: 取消老一/取消1\n"
     msg += "取消下一轮预约: 取消下轮\n"
     msg += "查询进度/预约/boss当前状态: 老几了/预约情况/预约状态\n"
     msg += "报刀: 报刀/打了/杀了/恰了（纯数字，单位是w，有空格）\n"
-    msg += "设置boss实际剩余血量: 更新老一/更1 血量（纯数字，单位是w，有空格）\n"
+    msg += "设置boss实际剩余血量: 更新老一/更1 数字（单位w，有空格）\n"
     msg += "boss死亡后: 老一了/老1了\n"
     msg += "上树: 上树/挂树\n"
     msg += "查询挂树情况: 树上情况/状态\n"
@@ -86,19 +86,22 @@ async def exchange_stage(app, member, index):
         write_guild(member.group.id)
         await reply_group(app, member.group.id, '进入 ' + str(index) + ' 阶段')
         time.sleep(5)
-        await boss_dead(app, member, 1)
+        await boss_dead(app, member, 1, True)
     else:
         return await reply_group(app, member.group.id,
                                  '当前阶段为第 ' + str(guild_data['current_stage']) + ' 阶段, 不能进入 ' + str(index) + ' 阶段')
 
 
-async def order_boss(app, member, arg, index):
+async def order_boss(app, member, arg: str, index):
     global guild_data
     boss = guild_data['current_boss_data'][index - 1]
     killers = boss['killers'].copy()
-    killer = {'name': member.memberName, 'hp': 0}
+    killer = {'name': member.memberName, 'hp': 0, 'tail': 0}
     if check_dmg(arg):
         # pprint(killers)
+        if arg.endswith('*'):
+            killer['tail'] = 1
+            arg = arg[:len(arg) - 1]
         killer['hp'] = int(arg)
         if index + 1 == guild_data['current_boss']:
             cache_boss = guild_data['cache_boss']
@@ -167,6 +170,9 @@ async def order_next_boss(app, member, arg):
     killer = {'name': member.memberName, 'hp': 0}
     if check_dmg(arg):
         # pprint(killers)
+        if arg.endswith('*'):
+            killer['tail'] = 1
+            arg = arg[:len(arg) - 1]
         killer['hp'] = int(arg)
         if str(member.id) in cache_killers:
             # await cancel_boss(app, member, name, index, False)
@@ -238,12 +244,12 @@ async def cancel_next_boss(app, member):
         return await reply_group(app, member.group.id, '【下一轮】老 ' + str(current_boss) + ' 取消成功', [member.id])
 
 
-async def boss_dead(app, member, index):
+async def boss_dead(app, member, index, next_stage=False):
     global guild_data
     current_boss = guild_data['current_boss']
     if current_boss == index:
         return await reply_group(app, member.group.id, '目前的boss就是老 ' + str(current_boss))
-    elif (current_boss != 5 and current_boss == index - 1) or (current_boss == 5 and index == 1):
+    elif (current_boss != 5 and current_boss == index - 1) or (current_boss == 5 and index == 1) or next_stage:
         # 先重置打完boss的数据
         current = guild_data['current_boss_data'][current_boss - 1]
         # current['real_hp'] = current['all_hp']
@@ -267,17 +273,20 @@ async def boss_dead(app, member, index):
         write_guild(member.group.id)
         killers = boss['killers']
         members = []
-        msg = '老 ' + str(index) + ' 了'
+        msg = '老 ' + str(index) + ' 了\n'
         if len(killers) > 0:
             rank_list = sort_dmg(killers)
             for rank in rank_list:
                 # await reply_group(app, member.group.id, name + '了', [rank[0]])
                 # print_msg(rank=rank)
                 members.append(int(rank[0]))
-                msg += ', ' + rank[1] + '伤害为' + str(rank[2])
+                msg += rank[1] + ' ' + str(rank[2])
+                if rank[3] == 1:
+                    msg += ' 是尾刀/补偿刀'
+                msg += ', '
             #     time.sleep(30)
             # return
-            msg += ', 请注意按预约伤害排名出刀'
+            msg += '请遵守尾刀和大刀优先的原则，按顺序出刀'
         return await reply_group(app, member.group.id, msg, members)
     else:
         return await reply_group(app, member.group.id, '当前boss为老 ' + str(current_boss) + ', 不能跳到老 ' + str(index))
@@ -287,9 +296,12 @@ def sort_dmg(g):
     p = []
     for g_k in g.keys():
         t_name = strQ2B(g[g_k]['name']).split('(', maxsplit=1)[0]
-        t = (g_k, t_name, g[g_k]['hp'])
+        tail = 0
+        if 'tail' in g[g_k].keys():
+            tail = g[g_k]['tail']
+        t = (g_k, t_name, g[g_k]['hp'], tail)
         p.append(t)
-    rank_list = sorted(p, key=lambda x: x[2], reverse=True)
+    rank_list = sorted(p, key=lambda x: (x[3], x[2]), reverse=True)
     # pprint(rank_list)
     return rank_list
 
@@ -345,6 +357,8 @@ async def report_dmg(app, member, arg):
     current_boss = guild_data['current_boss']
     boss = guild_data['current_boss_data'][current_boss - 1]
     if check_dmg(arg):
+        if arg.endswith('*'):
+            arg = arg[:len(arg) - 1]
         if int(arg) > boss['real_hp']:
             return await reply_group(app, member.group.id, '无效数据，伤害不会比剩余血量高, 实际剩余血量：' + str(boss['real_hp']),
                                      [member.id])
@@ -357,7 +371,7 @@ async def report_dmg(app, member, arg):
             # time.sleep(5)
             killers = boss['killers']
             if str(member.id) in killers:
-                return await cancel_boss(app, member, '老' + str(current_boss), current_boss - 1, False, False)
+                return await cancel_boss(app, member, current_boss - 1, False, False)
     else:
         return await reply_group(app, member.group.id, ILLEGAL_ERR, [member.id])
 
@@ -366,6 +380,8 @@ async def update_hp(app, member, arg, index):
     global guild_data
     boss = guild_data['current_boss_data'][index - 1]
     if check_dmg(arg):
+        if arg.endswith('*'):
+            arg = arg[:len(arg) - 1]
         boss['real_hp'] = int(arg)
         write_guild(member.group.id)
         return await reply_group(app, member.group.id, '老 ' + str(index) + ' 血量更新成功')
@@ -376,6 +392,8 @@ async def update_hp(app, member, arg, index):
 async def update_loop(app, member, arg):
     global guild_data
     if check_dmg(arg):
+        if arg.endswith('*'):
+            arg = arg[:len(arg) - 1]
         guild_data['current_loop'] = int(arg)
         write_guild(member.group.id)
         return await reply_group(app, member.group.id, '修改圈数成功')

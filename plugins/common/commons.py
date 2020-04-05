@@ -4,7 +4,7 @@ from urllib import request
 from idna import unichr
 from mirai import Plain, At, AtAll
 
-pattern = re.compile('[0-9]')
+pattern = re.compile('[0-9*]')
 
 
 # 检查伤害数据合法性

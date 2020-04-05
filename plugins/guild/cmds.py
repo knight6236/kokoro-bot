@@ -88,7 +88,7 @@ async def _(app, ctx, args):
     await cancel_next_boss(app, ctx)
 
 
-@command('老几了', aliases=['当前进度', '当前状态', '预约情况', '预约状态'])
+@command('老几了', aliases=['当前进度', '当前状态', '预约情况', '预约状态', '查询预约', '预约查询'])
 async def _(app, ctx, args):
     await stage_info(app, ctx)
 
