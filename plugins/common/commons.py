@@ -4,16 +4,18 @@ from urllib import request
 from idna import unichr
 from mirai import Plain, At, AtAll
 
-pattern = re.compile('[0-9*]')
+pattern = re.compile(r'[0-9]{1,4}[*]*$')
 
 
 # 检查伤害数据合法性
-def check_dmg(arg):
-    print_msg(check_dmg=arg)
-    if pattern.match(arg):
+def check_dmg(s: str):
+    if pattern.match(s):
         return True
     else:
         return False
+
+
+# print(check_dmg('300*'))
 
 
 # 读取json文件
@@ -106,10 +108,39 @@ def deal_task(s: str):
     s = s.replace('分', '')
     # m = re.search(r"(\d{4}[-/]\d{1,2}[-/]\d{1,2}\s\d{1,2}:\d{0,2})", s)
     try:
-        m = re.search('(?P<time>\d{1,2}[-]{0,1}\d{1,2}\s\d{1,2}:{,1}\d{0,2})(?P<task>.*)', s)
+        m = re.search(r'(?P<time>\d{1,2}[-]\d{1,2}\s\d{1,2}[:]\d{0,2})(?P<task>.*)', s)
         content = m.groupdict()
         content['time'] = '2020-' + content['time'] + ":00"
         print(content)  # 在起始位置匹配
         return content
     except AttributeError:
+        print('deal_task err')
         return None
+
+
+# deal_task('3月25号22点0分和可可萝一起洗澡')
+
+
+def deal_task(s: str):
+    try:
+        m = re.search(r'(?P<task_mark>[1-4][-][1-5])\s*(?P<team>[\u4E00-\u9FA50-9a-zA-Z]+)\s(?P<score>[0-9]{1,4})$', s)
+        content = m.groupdict()
+        print(content)
+        return content
+    except AttributeError:
+        print('check_task err')
+        return None
+
+
+# deal_task('1-5 狼克剑圣猫拳春妈nnk 900')
+
+
+task_pattern = re.compile(r'[1-4][-][1-5]')
+
+
+# 检查作业数据合法性
+def check_task_mark(s: str):
+    if task_pattern.match(s):
+        return True
+    else:
+        return False

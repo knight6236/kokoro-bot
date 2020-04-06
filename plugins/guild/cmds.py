@@ -1,6 +1,6 @@
 from plugins.common.decorators import command
-from plugins.guild.guild import *
 from plugins.guild.activities import *
+from plugins.guild.task import *
 
 
 @command('公会菜单', aliases=['公会帮助', '菜单', '帮助', 'menu', 'help'])
@@ -176,3 +176,18 @@ async def _(app, ctx, args):
 @command('我的活跃度', aliases=['我的排名', '活跃度', '排名'])
 async def _(app, ctx, args):
     await query_points(app, ctx)
+
+
+@command('导入作业', aliases=['写作业', '录作业'])
+async def _(app, ctx, args):
+    await import_task(app, ctx, args)
+
+
+@command('查询作业', aliases=['作业列表'])
+async def _(app, ctx, args):
+    await query_task(app, ctx, args)
+
+
+@command('当前作业', aliases=['作业'])
+async def _(app, ctx, args):
+    await query_current_task(app, ctx)

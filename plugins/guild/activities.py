@@ -9,7 +9,7 @@ activities = {}
 async def init_active(app: Mirai):
     global activities
     try:
-        activities = read_json('data/guild/active.json')
+        activities = read_json('data/active/active.json')
     except OSError:
         print_msg(tag='Error', err='未读取到文件，初始化所有群组活跃度数据')
         activities = await init_all_group_active(app)
@@ -22,7 +22,7 @@ async def init_all_group_active(app: Mirai, manage_groups):
     g_json = {}
     for group in manage_groups:
         g_json[str(group)] = await init_single_group_active(app, group)
-    write_json('data/guild/active.json', g_json)
+    write_json('data/active/active.json', g_json)
     return g_json
 
 
@@ -55,7 +55,7 @@ async def calculate_points(app: Mirai, member: Member):
         group_data[m_id] = member_date
     member_date['points'] += 1
     # pprint(activities)
-    write_json('data/guild/active.json', activities)
+    write_json('data/active/active.json', activities)
 
 
 async def query_points(app: Mirai, member: Member):

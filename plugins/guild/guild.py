@@ -11,11 +11,15 @@ guild_data: dict = {'current_stage': 1, 'current_boss': 1, 'current_loop': 1,
 
 
 def write_guild(groupId):
-    write_json('data/guild/' + str(groupId) + '.json', guild_data)
+    write_json('data/battle/' + str(groupId) + '.json', guild_data)
 
 
 def read_guild(groupId):
-    return read_json('data/guild/' + str(groupId) + '.json')
+    global guild_data
+    try:
+        return read_json('data/battle/' + str(groupId) + '.json')
+    except FileNotFoundError:
+        return guild_data
 
 
 def init():
@@ -69,7 +73,10 @@ async def menu(app, member):
     msg += "查询挂树情况: 树上情况/状态\n"
     msg += "切换阶段: 一阶了\n"
     msg += "修改圈数: 修改圈 数字\n"
-    msg += "查询活跃度: 我的活跃度/排名\n"
+    msg += "查询活跃度: 我的活跃度/排名\n\n"
+    msg += "记录作业: 导入作业 1-1 狼克剑圣猫拳511 700\n"
+    msg += "查询作业: 查询作业 1-1（可选，不加是查询全部）\n"
+    msg += "查询当前boss作业: 当前作业\n\n"
     msg += "预订任务: 添加任务：x月x号x点x分和可可萝一起洗澡\n"
     msg += "取消任务: 删除任务：任务id（查询获得）\n"
     msg += "查询任务: 我的任务"
