@@ -191,3 +191,8 @@ async def _(app, ctx, args):
 @command('当前作业', aliases=['作业'])
 async def _(app, ctx, args):
     await query_current_task(app, ctx)
+
+
+@command('重置作业')
+async def _(app, ctx, args):
+    await reset_task(app, ctx, args)
