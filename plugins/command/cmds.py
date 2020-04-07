@@ -1,12 +1,71 @@
 from plugins.common.decorators import command
-from plugins.guild.activities import *
+from plugins.scheduler.manage import *
+from plugins.guild.menu import *
+from plugins.guild.battle import *
 from plugins.guild.task import *
+from plugins.guild.manage import *
 
 
-@command('公会菜单', aliases=['公会帮助', '菜单', '帮助', 'menu', 'help'])
+####################### 菜单命令 #######################
+
+@command('菜单', aliases=['帮助', 'menu', 'help'])
 async def _(app, ctx, args):
     await menu(app, ctx)
 
+
+@command('管理菜单')
+async def _(app, ctx, args):
+    await manage_menu(app, ctx)
+
+
+@command('会战菜单')
+async def _(app, ctx, args):
+    await battle_menu(app, ctx)
+
+
+@command('作业菜单')
+async def _(app, ctx, args):
+    await task_menu(app, ctx)
+
+
+@command('任务菜单')
+async def _(app, ctx, args):
+    await job_menu(app, ctx)
+
+
+####################### 管理命令 #######################
+
+@command('创建公会', aliases=['新建公会'])
+async def _(app, ctx, args):
+    await create_guild(app, ctx, args)
+
+
+@command('开启公会', aliases=['开门'])
+async def _(app, ctx, args):
+    await guild_state(app, ctx, '开启', args)
+
+
+@command('关闭公会', aliases=['关门'])
+async def _(app, ctx, args):
+    await guild_state(app, ctx, '关闭', args)
+
+
+@command('加入公会', aliases=['入会'])
+async def _(app, ctx, args):
+    await join_guild(app, ctx, args)
+
+
+@command('退出公会', aliases=['退会'])
+async def _(app, ctx, args):
+    await exit_guild(app, ctx, args)
+
+
+@command('我的活跃度', aliases=['我的排名', '活跃度', '排名'])
+async def _(app, ctx, args):
+    await query_points(app, ctx)
+
+
+####################### 会战命令 #######################
 
 @command('一阶', aliases=['一阶了', '1阶', '1阶了'])
 async def _(app, ctx, args):
@@ -173,10 +232,7 @@ async def _(app, ctx, args):
     await tree_info(app, ctx)
 
 
-@command('我的活跃度', aliases=['我的排名', '活跃度', '排名'])
-async def _(app, ctx, args):
-    await query_points(app, ctx)
-
+####################### 作业命令 #######################
 
 @command('导入作业', aliases=['写作业', '录作业'])
 async def _(app, ctx, args):
@@ -196,3 +252,19 @@ async def _(app, ctx, args):
 @command('重置作业')
 async def _(app, ctx, args):
     await reset_task(app, ctx, args)
+
+
+####################### 任务命令 #######################
+@command('添加任务')
+async def _(app, ctx, args):
+    await add_job(app, ctx, args)
+
+
+@command('删除任务')
+async def _(app, ctx, args):
+    await remove_job(app, ctx, args)
+
+
+@command('我的任务')
+async def _(app, ctx, args):
+    await query_job(app, ctx, args)

@@ -1,19 +1,14 @@
 import time
-
-from mirai import MessageChain, MemberJoinEvent
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from pytz import utc
-
-from plugins.guild.guild import initData
-from plugins.guild.activities import *
-import plugins.guild.cmds  # 注册命令必须
-from plugins.common.decorators import commands
-from pprint import pprint
-from plugins.common.commons import *
 import yaml
 
-from plugins.schedulers.jobs import kill_warn
-from plugins.schedulers.manage import task_manage
+# 注册命令必须先导入
+import plugins.command.cmds
+
+from mirai import MessageChain, MemberJoinEvent
+
+from plugins.guild.manage import *
+from plugins.common.decorators import commands
+from plugins.scheduler.manage import run_scheduler
 
 f = open('config/bot.yaml', encoding="utf-8")
 cfg = yaml.load(f, Loader=yaml.FullLoader)
@@ -25,6 +20,7 @@ manage_groups = cfg['groups']
 
 @app.receiver("MemberJoinEvent")
 async def member_join(app: Mirai, event: MemberJoinEvent):
+    print(event)
     await app.sendGroupMessage(
         event.member.group.id,
         [
@@ -40,12 +36,10 @@ last_received_time = datetime.datetime.now()
 @app.receiver("GroupMessage")
 async def event_gm(app: Mirai, message: MessageChain, member: Member):
     global manage_groups, last_received_time
-    # print(manage_groups)
     if member.group.id not in manage_groups:
         return
 
-    # print(message)
-    await calculate_points(app, member)
+    await calculate_points(member)
 
     first_plain = message.getFirstComponent(Plain)
     if first_plain is None:
@@ -69,36 +63,11 @@ async def event_gm(app: Mirai, message: MessageChain, member: Member):
     print_msg(handler=handler)
 
     if handler:
-        initData(member)
         return await handler(app, member, arg)
-    else:
-        await task_manage(app, message, member, scheduler)
-
-
-scheduler = AsyncIOScheduler()
-
-
-def run_scheduler():
-    try:
-        # 重置活跃度数据
-        scheduler.add_job(func=init_all_group_active, args=[app, manage_groups], trigger='date',
-                          run_date='2020-03-25 05:00:00')
-        scheduler.add_job(func=kill_warn, args=[app, 1027426994], trigger='cron',
-                          hour='21', start_date='2020-03-25 05:00:00', end_date='2020-03-30 23:00:00')
-        # 启动定时任务调度器工作
-        scheduler.start()
-        print_msg(msg='定时任务调度器已启动')
-    except SystemError:
-        print('exit')
-        exit()
-
-
-@app.subroutine
-async def _(app: Mirai):
-    await init_active(app)
 
 
 if __name__ == "__main__":
+    print_msg(在管的群=manage_groups)
     run_scheduler()
-    print_msg(manage_groups=manage_groups)
+    init_path()
     app.run()
