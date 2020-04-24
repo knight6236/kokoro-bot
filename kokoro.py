@@ -27,7 +27,7 @@ async def member_join(app: Mirai, event: MemberJoinEvent):
         event.member.group.id,
         [
             At(target=event.member.id),
-            Plain(text="欢迎大佬进群 ヾ(@^▽^@)ノ ")
+            Plain(text="可可萝欢迎新主人进群 ヾ(@^▽^@)ノ ")
         ]
     )
 
@@ -50,13 +50,13 @@ async def event_gm(app: Mirai, message: MessageChain, member: Member):
     if msg == '':
         return
 
-    if '开启bot' == msg:
+    if '开启可可萝' == msg:
         if member.permission == Permission.Member:
             return await app.sendGroupMessage(member.group, [Plain(text='无权限使用此命令，请联系会长或管理')])
         manage_groups.append(member.group.id)
         write_json(groups_config_path, manage_groups)
         return await app.sendGroupMessage(member.group, [Plain(text='可可萝将会全力照顾主人的(*￣︶￣)~')])
-    elif '关闭bot' == msg:
+    elif '关闭可可萝' == msg:
         if member.permission == Permission.Member:
             return await app.sendGroupMessage(member.group, [Plain(text='无权限使用此命令，请联系会长或管理')])
         if member.group.id in manage_groups:
