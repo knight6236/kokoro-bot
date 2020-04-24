@@ -1,6 +1,8 @@
 import time
 from pprint import pprint
 
+from mirai import Permission, Member
+
 from plugins.common.constants import *
 from plugins.common.commons import *
 from plugins.guild.manage import is_guild_member
@@ -24,12 +26,44 @@ def read_battle(groupId):
     try:
         return read_json('data/battle/' + str(groupId) + '.json')
     except FileNotFoundError:
-        return {'current_stage': 1, 'current_boss': 1, 'current_loop': 1,
+        return {'battle_state': '关闭', 'current_stage': 1, 'current_boss': 1, 'current_loop': 1,
                 'tree_members': {}, 'cache_boss': boss_data[0][0].copy(), 'current_boss_data': boss_data[0].copy()}
 
 
-async def exchange_stage(app, member, index):
+async def start_battle(app, member: Member, arg):
     if not await is_guild_member(app, member):
+        return
+    if member.permission == Permission.Member:
+        return await reply_group(app, member.group.id, '无权限使用此命令，请联系会长或管理')
+    guild_data = {'battle_state': '开启', 'current_stage': 1, 'current_boss': 1, 'current_loop': 1,
+                  'tree_members': {}, 'cache_boss': boss_data[0][0].copy(), 'current_boss_data': boss_data[0].copy()}
+    write_battle(member.group.id, guild_data)
+    return await reply_group(app, member.group.id, '会战已开启')
+
+
+async def end_battle(app, member, arg):
+    if not await is_guild_member(app, member):
+        return
+    if member.permission == Permission.Member:
+        return await reply_group(app, member.group.id, '无权限使用此命令，请联系会长或管理')
+    guild_data = read_battle(member.group.id)
+    guild_data['battle_state'] = '关闭'
+    write_battle(member.group.id, guild_data)
+    return await reply_group(app, member.group.id, '会战已关闭')
+
+
+async def is_battle(app, member):
+    if not await is_guild_member(app, member):
+        return False
+    guild_data = read_battle(member.group.id)
+    if guild_data['battle_state'] == '关闭':
+        await reply_group(app, member.group.id, '会战功能还未开启，请联系会长或管理')
+        return False
+    return True
+
+
+async def exchange_stage(app, member, index):
+    if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
     if guild_data['current_stage'] == index:
@@ -47,8 +81,7 @@ async def exchange_stage(app, member, index):
 
 
 async def order_boss(app, member, arg: str, index):
-    is_member = await is_guild_member(app, member)
-    if not is_member:
+    if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
     boss = guild_data['current_boss_data'][index - 1]
@@ -119,7 +152,7 @@ async def order_boss(app, member, arg: str, index):
 
 
 async def order_next_boss(app, member, arg):
-    if not await is_guild_member(app, member):
+    if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
     current_boss = guild_data['current_boss']
@@ -151,7 +184,7 @@ async def order_next_boss(app, member, arg):
 
 
 async def cancel_boss(app, member, index, reply=True, report=True):
-    if not await is_guild_member(app, member):
+    if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
     boss = guild_data['current_boss_data'][index - 1]
@@ -188,7 +221,7 @@ async def cancel_boss(app, member, index, reply=True, report=True):
 
 
 async def cancel_next_boss(app, member):
-    if not await is_guild_member(app, member):
+    if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
     current_boss = guild_data['current_boss']
@@ -205,7 +238,7 @@ async def cancel_next_boss(app, member):
 
 
 async def boss_dead(app, member, index, next_stage=False):
-    if not await is_guild_member(app, member):
+    if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
     current_boss = guild_data['current_boss']
@@ -247,7 +280,7 @@ async def boss_dead(app, member, index, next_stage=False):
 
 
 async def reset_boss(app, member, index):
-    if not await is_guild_member(app, member):
+    if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
     if index < 1 or index > 5:
@@ -260,7 +293,7 @@ async def reset_boss(app, member, index):
 
 
 async def stage_info(app, member):
-    if not await is_guild_member(app, member):
+    if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
     current_stage = guild_data['current_stage']
@@ -296,7 +329,7 @@ async def stage_info(app, member):
 
 
 async def report_dmg(app, member, arg):
-    if not await is_guild_member(app, member):
+    if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
     current_boss = guild_data['current_boss']
@@ -321,7 +354,7 @@ async def report_dmg(app, member, arg):
 
 
 async def update_hp(app, member, arg, index):
-    if not await is_guild_member(app, member):
+    if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
     boss = guild_data['current_boss_data'][index - 1]
@@ -336,7 +369,7 @@ async def update_hp(app, member, arg, index):
 
 
 async def update_loop(app, member, arg):
-    if not await is_guild_member(app, member):
+    if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
     if check_dmg(arg):
@@ -350,7 +383,7 @@ async def update_loop(app, member, arg):
 
 
 async def up_tree(app, member):
-    if not await is_guild_member(app, member):
+    if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
     if str(member.id) in guild_data['tree_members']:
@@ -361,7 +394,7 @@ async def up_tree(app, member):
 
 
 async def down_tree(app, member):
-    if not await is_guild_member(app, member):
+    if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
     members = guild_data['tree_members'].keys()
@@ -374,7 +407,7 @@ async def down_tree(app, member):
 
 
 async def tree_info(app, member):
-    if not await is_guild_member(app, member):
+    if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
     members = guild_data['tree_members'].values()

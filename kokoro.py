@@ -15,7 +15,9 @@ cfg = yaml.load(f, Loader=yaml.FullLoader)
 
 app = Mirai(f"{cfg['host']}?authKey={cfg['authKey']}&qq={cfg['qq']}", websocket={cfg['enableWebsocket']})
 
-manage_groups = cfg['groups']
+manage_groups: list = cfg['groups']
+
+groups_config_path = 'config/manage_groups.json'
 
 
 @app.receiver("MemberJoinEvent")
@@ -36,8 +38,8 @@ last_received_time = datetime.datetime.now()
 @app.receiver("GroupMessage")
 async def event_gm(app: Mirai, message: MessageChain, member: Member):
     global manage_groups, last_received_time
-    if member.group.id not in manage_groups:
-        return
+    if os.path.exists(groups_config_path):
+        manage_groups = read_json(groups_config_path)
 
     await calculate_points(member)
 
@@ -47,12 +49,29 @@ async def event_gm(app: Mirai, message: MessageChain, member: Member):
     msg = first_plain.toString().strip()
     if msg == '':
         return
-    print_msg(msg=msg)
+
+    if '开启bot' == msg:
+        if member.permission == Permission.Member:
+            return await app.sendGroupMessage(member.group, [Plain(text='无权限使用此命令，请联系会长或管理')])
+        manage_groups.append(member.group.id)
+        write_json(groups_config_path, manage_groups)
+        return await app.sendGroupMessage(member.group, [Plain(text='可可萝将会全力照顾主人的(*￣︶￣)~')])
+    elif '关闭bot' == msg:
+        if member.permission == Permission.Member:
+            return await app.sendGroupMessage(member.group, [Plain(text='无权限使用此命令，请联系会长或管理')])
+        if member.group.id in manage_groups:
+            manage_groups.remove(member.group.id)
+            write_json(groups_config_path, manage_groups)
+            return await app.sendGroupMessage(member.group, [Plain(text='很遗憾，可可萝以后不能再照顾主人了o(╥﹏╥)o')])
+
+    if member.group.id not in manage_groups:
+        return
 
     if datetime.datetime.now().timestamp() - last_received_time.timestamp() < 5:
         time.sleep(random.randint(0, 2))
     last_received_time = datetime.datetime.now()
 
+    print_msg(msg=msg)
     sp = msg.split(maxsplit=1)
     print_msg(sp=sp)
     cmd, *args = sp

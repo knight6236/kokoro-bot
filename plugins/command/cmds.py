@@ -40,14 +40,14 @@ async def _(app, ctx, args):
     await create_guild(app, ctx, args)
 
 
-@command('开启公会', aliases=['开门'])
+@command('开启公会')
 async def _(app, ctx, args):
-    await guild_state(app, ctx, '开启', args)
+    await exchange_guild_state(app, ctx, '开启', args)
 
 
-@command('关闭公会', aliases=['关门'])
+@command('关闭公会')
 async def _(app, ctx, args):
-    await guild_state(app, ctx, '关闭', args)
+    await exchange_guild_state(app, ctx, '关闭', args)
 
 
 @command('加入公会', aliases=['入会'])
@@ -60,12 +60,27 @@ async def _(app, ctx, args):
     await exit_guild(app, ctx, args)
 
 
+@command('公会信息', aliases=['公会状态'])
+async def _(app, ctx, args):
+    await query_guild_state(app, ctx, args)
+
+
 @command('我的活跃度', aliases=['我的排名', '活跃度', '排名'])
 async def _(app, ctx, args):
     await query_points(app, ctx)
 
 
 ####################### 会战命令 #######################
+
+@command('开启会战', aliases=['开始会战', '会战开始'])
+async def _(app, ctx, args):
+    await start_battle(app, ctx, args)
+
+
+@command('关闭会战', aliases=['结束会战', '会战结束'])
+async def _(app, ctx, args):
+    await end_battle(app, ctx, args)
+
 
 @command('一阶', aliases=['一阶了', '1阶', '1阶了'])
 async def _(app, ctx, args):

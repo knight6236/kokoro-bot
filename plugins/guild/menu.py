@@ -13,12 +13,15 @@ async def manage_menu(app, member):
     msg = '创建公会：创建/新建公会 公会名-不加就默认群名（需要管理权限）\n'
     msg += "开启/关闭成员入会: 开启/关闭公会（需要管理权限）\n"
     msg += "入会/退会: 加入/退出公会\n"
+    msg += "查询公会信息: 公会信息\n"
     msg += "查询活跃度: 我的活跃度/排名"
     await reply_group(app, member.group.id, msg)
 
 
 async def battle_menu(app, member):
-    msg = '预约boss: 预约老一/预约1 数字（单位w，有空格；尾刀/补偿刀在数字后面加*）\n'
+    msg = '开启会战: 开启会战/会战开始\n'
+    msg += '关闭会战: 关闭会战/会战结束\n'
+    msg += '预约boss: 预约老一/预约1 数字（单位w，有空格；尾刀/补偿刀在数字后面加*）\n'
     msg += "预约下一轮boss: 预约下轮\n"
     msg += "取消预约: 取消老一/取消1\n"
     msg += "取消下一轮预约: 取消下轮\n"

@@ -3,6 +3,7 @@ import os
 from mirai import Mirai, Member, Permission
 
 from plugins.common.commons import *
+from plugins.common.constants import ILLEGAL_ERR
 
 
 def get_all_guilds():
@@ -41,7 +42,7 @@ async def create_guild(app: Mirai, member: Member, args: str):
         return await reply_group(app, member.group.id, '无权限使用此命令，请联系会长或管理', [member.id])
 
 
-async def guild_state(app: Mirai, member: Member, state: str, args: str):
+async def exchange_guild_state(app: Mirai, member: Member, state: str, args: str):
     if member.permission == Permission.Owner or member.permission == Permission.Administrator:
         if member.group.id not in get_all_guilds():
             return await reply_group(app, member.group.id, '还未创建公会，请联系会长或管理', [member.id])
@@ -78,13 +79,39 @@ async def exit_guild(app: Mirai, member: Member, args: str):
         members: dict = g_data['members']
         if g_data['state'] == '关闭':
             return await reply_group(app, member.group.id, '公会是关闭状态，请联系会长或管理', [member.id])
-        if str(member.id) not in members.keys():
-            return await reply_group(app, member.group.id, '你不在公会里，不用退出', [member.id])
-        del members[str(member.id)]
+        if args == '':
+            if str(member.id) not in members.keys():
+                return await reply_group(app, member.group.id, '你不在公会里，不用退出', [member.id])
+            del members[str(member.id)]
+        else:
+            if member.permission == Permission.Member:
+                return await reply_group(app, member.group.id, '无权限使用此命令，请联系会长或管理', [member.id])
+            if not re.match(r'[0-9]{6:11}', args):
+                return await reply_group(app, member.group.id, ILLEGAL_ERR, [member.id])
+            if args not in members.keys():
+                return await reply_group(app, member.group.id, args + '不在公会里，不用退出', [member.id])
+            del members[args]
         write_guild(member.group.id, g_data)
         await reply_group(app, member.group.id, '退会成功', [member.id])
     else:
         return await reply_group(app, member.group.id, '还未创建公会，请联系会长或管理')
+
+
+async def query_guild_state(app: Mirai, member: Member, args: str):
+    if member.permission == Permission.Owner or member.permission == Permission.Administrator:
+        if member.group.id not in get_all_guilds():
+            return await reply_group(app, member.group.id, '还未创建公会，请联系会长或管理', [member.id])
+        g_data: dict = read_guild(member.group.id)
+        members = g_data['members']
+        msg = '公会名为：' + g_data['guild_name'] + '\n'
+        msg += '公会当前状态为：' + g_data['state'] + '\n'
+        msg += '公会当前共有 ' + str(len(members)) + ' 个人, 成员列表如下：\n'
+        for key in members.keys():
+            print(members[key])
+            msg += members[key]['name'] + ' 活跃度为：' + str(members[key]['points']) + '\n'
+        await reply_group(app, member.group.id, msg, [member.id])
+    else:
+        return await reply_group(app, member.group.id, '无权限使用此命令，请联系会长或管理', [member.id])
 
 
 async def calculate_points(member: Member):
