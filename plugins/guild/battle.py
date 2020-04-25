@@ -92,7 +92,7 @@ async def order_boss(app, member, arg: str, index):
             killer['tail'] = 1
             arg = arg[:len(arg) - 1]
         killer['hp'] = int(arg)
-        if index + 1 == guild_data['current_boss']:
+        if index == guild_data['current_boss']:
             cache_boss = guild_data['cache_boss']
             cache_killers = cache_boss['killers'].copy()
             if str(member.id) in killers:
@@ -189,7 +189,7 @@ async def cancel_boss(app, member, index, reply=True, report=True):
     guild_data = read_battle(member.group.id)
     boss = guild_data['current_boss_data'][index - 1]
     killers = boss['killers']
-    if index + 1 == guild_data['current_boss']:
+    if index == guild_data['current_boss']:
         cache_boss = guild_data['cache_boss']
         cache_killers = cache_boss['killers']
         if str(member.id) not in killers and str(member.id) not in cache_killers and reply:
@@ -252,7 +252,7 @@ async def boss_dead(app, member, index, next_stage=False):
         current.update(cache_boss)
         # 在初始化下一个boss的数据
         boss = guild_data['current_boss_data'][index - 1]
-        guild_data['cache_boss'] = boss_data[guild_data['current_stage'] - 1][current_boss].copy()
+        guild_data['cache_boss'] = boss_data[guild_data['current_stage'] - 1][index - 1].copy()
 
         await down_tree(app, member)
 
@@ -283,7 +283,7 @@ async def reset_boss(app, member, index):
     if not await is_battle(app, member):
         return
     guild_data = read_battle(member.group.id)
-    if index < 1 or index > 5:
+    if not re.match(r'[1-5]', index):
         return await reply_group(app, member.group.id, '只能重置1-5')
     current = guild_data['current_boss_data'][int(index) - 1]
     current['pre_hp'] = current['real_hp'] = current['all_hp']
@@ -348,7 +348,7 @@ async def report_dmg(app, member, arg):
 
             killers = boss['killers']
             if str(member.id) in killers:
-                return await cancel_boss(app, member, current_boss - 1, False, False)
+                return await cancel_boss(app, member, current_boss, False, False)
     else:
         return await reply_group(app, member.group.id, ILLEGAL_ERR, [member.id])
 

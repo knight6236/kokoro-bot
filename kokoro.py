@@ -50,13 +50,13 @@ async def event_gm(app: Mirai, message: MessageChain, member: Member):
     if msg == '':
         return
 
-    if '开启可可萝' == msg:
+    if '开启可可萝1' == msg:
         if member.permission == Permission.Member:
             return await app.sendGroupMessage(member.group, [Plain(text='无权限使用此命令，请联系会长或管理')])
         manage_groups.append(member.group.id)
         write_json(groups_config_path, manage_groups)
         return await app.sendGroupMessage(member.group, [Plain(text='可可萝将会全力照顾主人的(*￣︶￣)~')])
-    elif '关闭可可萝' == msg:
+    elif '关闭可可萝1' == msg:
         if member.permission == Permission.Member:
             return await app.sendGroupMessage(member.group, [Plain(text='无权限使用此命令，请联系会长或管理')])
         if member.group.id in manage_groups:
