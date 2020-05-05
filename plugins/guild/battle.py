@@ -254,13 +254,20 @@ async def boss_dead(app, member, index, next_stage=False):
         boss = guild_data['current_boss_data'][index - 1]
         guild_data['cache_boss'] = boss_data[guild_data['current_stage'] - 1][index - 1].copy()
 
-        await down_tree(app, member)
+        await down_tree(app, member, guild_data)
 
         time.sleep(5)
 
-        guild_data['current_boss'] = index
-        if index == 1:
+        if current_boss == 5 and index == 1:
             guild_data['current_loop'] += 1
+        guild_data['current_boss'] = index
+        #     if guild_data['current_loop'] > 3:
+        #         await exchange_stage(app, member, 2)
+        #     elif guild_data['current_loop'] > 10:
+        #         await exchange_stage(app, member, 3)
+        #     elif guild_data['current_loop'] > 34:
+        #         await exchange_stage(app, member, 4)
+        # pprint(guild_data)
         write_battle(member.group.id, guild_data)
         killers = boss['killers']
         members = []
@@ -393,17 +400,18 @@ async def up_tree(app, member):
     return await reply_group(app, member.group.id, '上树成功', [member.id])
 
 
-async def down_tree(app, member):
-    if not await is_battle(app, member):
-        return
-    guild_data = read_battle(member.group.id)
+async def down_tree(app, member, guild_data):
+    # if not await is_battle(app, member):
+    #     return
+    # guild_data = read_battle(member.group.id)
     members = guild_data['tree_members'].keys()
     if len(members) == 0:
         return await reply_group(app, member.group.id, '树上无人')
     await reply_group(app, member.group.id, 'boss已死亡', map(int, members))
     guild_data['tree_members'].clear()
-    write_battle(member.group.id, guild_data)
-    return
+    # pprint(guild_data)
+    # write_battle(member.group.id, guild_data)
+    # return
 
 
 async def tree_info(app, member):
